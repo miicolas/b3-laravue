@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\TrackController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\TrackController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -17,7 +17,18 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('test', [HomeController::class, 'test'])->name('test');
-Route::get('tracks', [TrackController::class, 'index'])->name('tracks');
-Route::get('tracks/create', [TrackController::class, 'create'])->name('tracks.create');
-Route::post('tracks', [TrackController::class, 'store'])->name('tracks.store');
+
+Route::middleware(['auth', 'verified'])->name('tracks.')->prefix('tracks')->group(function () {
+    Route::get('/', [TrackController::class, 'index'])->name('index');
+    Route::middleware('admin')->group(function () {
+        Route::resource('tracks', TrackController::class)->except(['index', 'show']);
+    });
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('playlists', \App\Http\Controllers\PlaylistController::class);
+    Route::post('playlists/{playlist}/tracks', [\App\Http\Controllers\PlaylistTrackController::class, 'store'])->name('playlists.tracks.store');
+    Route::delete('playlists/{playlist}/tracks/{track}', [\App\Http\Controllers\PlaylistTrackController::class, 'destroy'])->name('playlists.tracks.destroy');
+});
+
 require __DIR__.'/settings.php';

@@ -8,7 +8,10 @@ export type Track = {
     year?: string | null;
     duration?: string | null;
     thumbnail?: string | null;
+    thumbnail_url?: string | null;
+    audio_file_url?: string | null;
     play_count?: number | null;
     created_at?: string | null;
+    is_visible?: boolean | null;
 };
 

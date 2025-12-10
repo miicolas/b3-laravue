@@ -1,23 +1,33 @@
 <script setup lang="ts">
-import { Heart, MoreHorizontal, Play, Plus } from 'lucide-vue-next';
-import { Link } from '@inertiajs/vue3';
+import { Heart, Play, Plus, Search } from 'lucide-vue-next';
+import { Link, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { ref, watch } from 'vue';
+import { useDebounceFn } from '@vueuse/core';
+
+const props = defineProps<{
+    search?: string;
+    isAdmin?: boolean;
+}>();
 
 const emit = defineEmits<{
     (e: 'play'): void;
 }>();
+
+const searchQuery = ref(props.search ?? '');
+
+const performSearch = useDebounceFn((value: string) => {
+    router.get('/tracks', { search: value || undefined }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}, 300);
+
+watch(searchQuery, (value) => {
+    performSearch(value);
+});
 </script>
 
 <template>
@@ -31,7 +41,7 @@ const emit = defineEmits<{
         <button class="text-white/70 hover:text-white">
             <Heart :size="32" />
         </button>
-        <Link href="/tracks/create">
+        <Link v-if="props.isAdmin" href="/tracks/create">
             <Button
                 variant="outline"
                 type="button"
@@ -41,42 +51,16 @@ const emit = defineEmits<{
                 <span>Nouveau track</span>
             </Button>
         </Link>
-        <Dialog>
-            <DialogTrigger as-child>
-                <Button variant="outline" type="button">
-                    <MoreHorizontal :size="24" />
-                </Button>
-            </DialogTrigger>
-            <DialogContent class="sm:max-w-[425px]">
-                <form class="grid gap-4">
-                    <DialogHeader>
-                        <DialogTitle>Edit profile</DialogTitle>
-                        <DialogDescription>
-                            Make changes to your profile here. Click save when you're done.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div class="grid gap-4">
-                        <div class="grid gap-3">
-                            <Label for="name-1">Name</Label>
-                            <Input id="name-1" name="name" default-value="Pedro Duarte" />
-                        </div>
-                        <div class="grid gap-3">
-                            <Label for="username-1">Username</Label>
-                            <Input id="username-1" name="username" default-value="@peduarte" />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose as-child>
-                            <Button variant="outline" type="button">
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <Button type="submit">
-                            Save changes
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
+
+        <!-- Search Input -->
+        <div class="relative ml-auto">
+            <Search :size="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+            <Input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Rechercher un titre..."
+                class="w-64 bg-white/10 border-white/10 text-white placeholder:text-white/50 pl-10 focus:bg-white/20 focus:border-white/20"
+            />
+        </div>
     </div>
 </template>
