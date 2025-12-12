@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Playlist;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
@@ -20,7 +20,7 @@ class StorePlaylistRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        if (!$this->slug && $this->name) {
+        if (! $this->slug && $this->name) {
             $this->merge([
                 'slug' => Str::slug($this->name),
             ]);

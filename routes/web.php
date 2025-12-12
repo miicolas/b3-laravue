@@ -29,6 +29,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('playlists', \App\Http\Controllers\PlaylistController::class);
     Route::post('playlists/{playlist}/tracks', [\App\Http\Controllers\PlaylistTrackController::class, 'store'])->name('playlists.tracks.store');
     Route::delete('playlists/{playlist}/tracks/{track}', [\App\Http\Controllers\PlaylistTrackController::class, 'destroy'])->name('playlists.tracks.destroy');
+
+    Route::resource('api-keys', \App\Http\Controllers\ApiKeyController::class)->parameters([
+        'api-keys' => 'apiKey:slug',
+    ]);
 });
 
 require __DIR__.'/settings.php';
